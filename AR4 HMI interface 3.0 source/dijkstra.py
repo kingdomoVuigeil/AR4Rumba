@@ -164,7 +164,20 @@ def getOriginalMatrix(game_positon_matrix, inverse_columns, inverse_rows):
             original_matrix[columns][rows] = game_positon_matrix[columns + offset_col][rows + offset_row]
     return original_matrix
             
-
+def getIndexAdditionFromOriginalMatrix(original_matrix):
+    """returns an Integer value
+    depending on the alignment of the pieces the index can be exactly calculated
+    each number is looked for, starting with 9
+    then, depending on its position in the list, it is multipplied to the product
+    at the end 1 is subtracted from the product
+    """
+    numbers = [0 for pieces in range(9)]
+    product = 1
+    for elements in range(8):
+        numbers[elements] = original_matrix.index(9-elements)
+        original_matrix.remove(9-elements)
+        product *= 10 - numbers[elements]
+    return (product-1)
 
 def getListIndexFromGamePosition(game_positon_matrix):
     """returns an Integer from a game_position_matrix (4x3 in Integers)
@@ -174,7 +187,9 @@ def getListIndexFromGamePosition(game_positon_matrix):
     permutation_type = getListIndexFromGamePosition(game_positon_matrix)
     inverse_columns, inverse_rows = getInverseMatrixFromPermutationType(permutation_type)
     original_matrix = getOriginalMatrix(game_positon_matrix, inverse_columns, inverse_rows)
-    index = 362880 * permutation_type
+    index_addition = getIndexAdditionFromOriginalMatrix(original_matrix)
+    index = 362880 * permutation_type + index_addition
+    return index
 
 def findGamePosition(game_position, all_game_positions):
     """returns an Integer from a game_position (4x3 in Integers)
@@ -280,17 +295,18 @@ def createAllPositions():
                 print('Error in switch case createAllPositions: ' + str(number_all_columns_full))
 
         print('case ', (number_all_columns_full + 0), ':' ,'\n    inverse_columns = ', offset_matrix_col, '\n    inverse_rows = ' ,offset_matrix_row) 
-        # for first_piece in range(9):
+        for first_piece in range(9):
 
-        #     for second_piece in range(8):
-        #         for third_piece in range(7):
-        #             for fourth_piece in range(6):
-        #                 for fifth_piece in range(5):
-        #                     for sixth_piece in range(4):
-        #                         for seventh_piece in range(3):
-        #                             for eigth_piece in range(2):
-        #                                 permutation = createPermutation(first_piece, second_piece, third_piece, fourth_piece, fifth_piece, sixth_piece, seventh_piece, eigth_piece)
-        #                                 all_game_positions.append(copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full))
+            for second_piece in range(8):
+                for third_piece in range(7):
+                    for fourth_piece in range(6):
+                        for fifth_piece in range(5):
+                            for sixth_piece in range(4):
+                                for seventh_piece in range(3):
+                                    for eigth_piece in range(2):
+                                        permutation = createPermutation(first_piece, second_piece, third_piece, fourth_piece, fifth_piece, sixth_piece, seventh_piece, eigth_piece)
+                                        all_game_positions.append(copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full))
+                                        print('List Length: ', len(all_game_positions), '   calculated index: ' ,getListIndexFromGamePosition(len(all_game_positions)))
                                         
     offset_matrix_col = [[0 for row in range(3)] for col in range(3)]
     offset_matrix_row = [[0 for row in range(3)] for col in range(3)]                               
