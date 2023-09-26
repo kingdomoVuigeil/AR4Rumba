@@ -22,6 +22,11 @@ class GamePosition:
                     pass
 
 def getPermutationTypeFromGamePositon(game_positon_matrix):
+    """return an Integer Number between 0 an 20
+    different possible Game Patterns are analysed and definetely assigned to a permutation type
+    e.g.: if in the third column the most bottom plac is empty,
+      than it is clear that the first three columns are full -> type 0
+    """
     if (game_positon_matrix[3][0] == 0):
         permutation_type = 0
     elif (game_positon_matrix[2][0] == 0):
@@ -71,7 +76,10 @@ def getPermutationTypeFromGamePositon(game_positon_matrix):
     return permutation_type
 
 def getInverseMatrixFromPermutationType(permutation_type):
-
+    """ return two 3x3 arrays of type Integer
+    the inverse matrices are the offset matrices multiplied by (-1)
+    as the matrices are not of numpy type, the multiplication is done in a loop
+    """
 
     match permutation_type:
         case 0:
@@ -143,6 +151,11 @@ def getInverseMatrixFromPermutationType(permutation_type):
     return inverse_columns, inverse_rows
                 
 def getOriginalMatrix(game_positon_matrix, inverse_columns, inverse_rows):
+    """ returns a single 3x3 array
+    this is the inverse function to copyPermutationToGamePosition
+    from a 4x3 array (all columns) it recalculates the permutation
+    important to find the exact index of the permutation
+    """
     original_matrix = [[0 for row in range(3)] for col in range(3)]
     for columns in range(3):
         for rows in range(3):
@@ -152,13 +165,22 @@ def getOriginalMatrix(game_positon_matrix, inverse_columns, inverse_rows):
     return original_matrix
             
 
-def getListIndexFromGamePosition(game_positon_matrix):
-    permutation_type = getListIndexFromGamePosition(game_positon_matrix)
 
-    
+def getListIndexFromGamePosition(game_positon_matrix):
+    """returns an Integer from a game_position_matrix (4x3 in Integers)
+    it basically does the same as findGamePosition, 
+    but as it does not have to look up 5.000.000 entries, it should be faster
+    """
+    permutation_type = getListIndexFromGamePosition(game_positon_matrix)
+    inverse_columns, inverse_rows = getInverseMatrixFromPermutationType(permutation_type)
+    original_matrix = getOriginalMatrix(game_positon_matrix, inverse_columns, inverse_rows)
     index = 362880 * permutation_type
 
 def findGamePosition(game_position, all_game_positions):
+    """returns an Integer from a game_position (4x3 in Integers)
+    it basically does the same as getListIndexFromGamePosition, 
+    but way slower as the complexety is O(n)
+    """    
     for index, position in enumerate(all_game_positions):
         narr1 = n.array([game_position.matrix])
         narr2 = n.array([position.matrix])
@@ -168,6 +190,9 @@ def findGamePosition(game_position, all_game_positions):
     return 99999999999999 #error
     
 def getNewPermutation(permutation3times3, piece, piece_value):
+    """returns a 3x3 Matrix
+    basically just adds a single Integer into the matrix
+    """
 
     for col in range(3):
         for row in range(3):
@@ -180,6 +205,9 @@ def getNewPermutation(permutation3times3, piece, piece_value):
     print ('no Permutation found')
 
 def createPermutation(first_piece, second_piece, third_piece, fourth_piece, fifth_piece, sixth_piece, seventh_piece, eigth_piece):
+    """returns a 3x3 matrix
+    creates a matrix where all pieces are arranged according to their value
+    """
     permutation3times3 = [[0 for row in range(3)] for col in range(3)]
     permutation3times3 = getNewPermutation(permutation3times3, first_piece, 1)
     permutation3times3 = getNewPermutation(permutation3times3, second_piece, 2)
@@ -193,6 +221,9 @@ def createPermutation(first_piece, second_piece, third_piece, fourth_piece, fift
     return permutation3times3
 
 def copyPermutationToGamePosition(permutation3times3, offset_matrix_col, offset_matrix_row, permutation_type):
+    """returns a 4x3 matrix
+    copies a 3x3 permutation onto the 4 columns of a game_position
+    """
     game_matrix = [[0 for row in range(3)] for col in range(4)]
     for columns in range(3):
         for rows in range(3):
@@ -203,6 +234,8 @@ def copyPermutationToGamePosition(permutation3times3, offset_matrix_col, offset_
 
 
 def createAllPositions():
+    """creates all 20*362.880 positions and appends them to all_game_positions
+    """
 
     # timestamp for performance measurement
     start_time = time.time()
