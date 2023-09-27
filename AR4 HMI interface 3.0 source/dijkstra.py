@@ -8,6 +8,7 @@ class GamePosition:
         self.matrix = matrix
         self.distancevalue = distancevalue
         self.permutation_type = permutation_type
+        self.possible_moves_indexes = []
 
     def getAllPossibleMoves(self, all_game_positions):
         #returns an Array of up to 12 GamePositions
@@ -474,6 +475,7 @@ def createAllPositions():
 
     # timestamp for performance measurement
     start_time = time.time()
+    f = open("all_positions.txt", "a")
 
 
 
@@ -528,8 +530,11 @@ def createAllPositions():
                                     for eigth_piece in range(2):
                                         permutation = createPermutation(first_piece, second_piece, third_piece, fourth_piece, fifth_piece, sixth_piece, seventh_piece, eigth_piece)
                                         game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full)
+                                        game_position.possible_moves_indexes = getListOfPossibleIndexesFromGamePosition(game_position)
                                         all_game_positions.append(game_position)
-                                        print (getListOfPossibleIndexesFromGamePosition(game_position))
+                                        print ('Index: ', (len(all_game_positions) -1 ), 'matrix: ' , game_position.matrix, file = f)
+                                        print ('Possible Moves: ', getListOfPossibleIndexesFromGamePosition(game_position), file = f)
+
 
                                             
                                         
@@ -686,6 +691,7 @@ def createAllPositions():
                                         game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full)
                                         all_game_positions.append(game_position)
     print("Process finished --- %s seconds ---" % (time.time() - start_time))
+    f.close()
 def main():
     print('main')
     createAllPositions()
