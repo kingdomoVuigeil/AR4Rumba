@@ -1,6 +1,7 @@
 import numpy as n
 import time
 import math
+import copy
 
 class GamePosition:
     def __init__(self, matrix, permutation_type, distancevalue):
@@ -26,10 +27,10 @@ class GamePosition:
 def getListOfIndexesFromPossibleMoves(game_position, possible_moves):
     possible_indexes = []
     for move in possible_moves:
-        actual_game_position = game_position.copy()
+        actual_game_position = copy.deepcopy(game_position)
         #end piece is start piece
-        actual_game_position.matrix[move[1]] = actual_game_position.matrix[move[0]]
-        actual_game_position.matrix[move[0]] = 0
+        actual_game_position.matrix[move[1][0][0]][move[1][0][1]] = actual_game_position.matrix[move[0][0][0]][move[0][0][1]]
+        actual_game_position.matrix[move[0][0][0]][move[0][0][1]] = 0
         index = getListIndexFromGamePosition(actual_game_position)
         possible_indexes.append(index)
     return possible_indexes
@@ -55,7 +56,7 @@ def getListOfPossibleIndexesFromGamePosition(game_position):
         for end_pos in end_pieces:
             if start_pos[0] != end_pos[0]:
                 #not same column
-                possible_moves.append([start_pos][end_pos])
+                possible_moves.append([[start_pos],[end_pos]])
     return getListOfIndexesFromPossibleMoves(game_position, possible_moves)
 
 
@@ -528,6 +529,7 @@ def createAllPositions():
                                         permutation = createPermutation(first_piece, second_piece, third_piece, fourth_piece, fifth_piece, sixth_piece, seventh_piece, eigth_piece)
                                         game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full)
                                         all_game_positions.append(game_position)
+                                        print (getListOfPossibleIndexesFromGamePosition(game_position))
 
                                             
                                         
