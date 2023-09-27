@@ -2,6 +2,7 @@ import numpy as n
 import time
 import math
 import copy
+import pickle
 
 class GamePosition:
     def __init__(self, matrix, permutation_type, index, weight = 1):
@@ -75,6 +76,9 @@ def callDijkstra(all_game_positions):
 
 def testDijkstra():
     all_game_positions = []
+
+    for game_position in pickle_loader('all_game_positions.pkl'):
+        all_game_positions.append(game_position)
     for number in range(9):
         all_game_positions.append(GamePosition(0, 0, number))
     all_game_positions[0].possible_moves_indexes.append(1)
@@ -111,19 +115,19 @@ def testDijkstra():
     all_game_positions[8].possible_moves_indexes.append(5)
     all_game_positions[8].possible_moves_indexes.append(7)
 
+
+
     callDijkstra(all_game_positions)
 
-
-
-
-
-
-
-
+    save_object(all_game_positions, 'all_game_positions.pkl')
 
 
 
 def getListOfIndexesFromPossibleMoves(game_position, possible_moves):
+    """Returns a List of Integers
+    depending on the game_position, 3, 6, or 9 Integers are stored in a list and returned
+    The Integers represent Indexes used to get GamePositions from all_game_positions
+    """
     possible_indexes = []
     for move in possible_moves:
         actual_game_position = copy.deepcopy(game_position)
@@ -135,6 +139,10 @@ def getListOfIndexesFromPossibleMoves(game_position, possible_moves):
     return possible_indexes
 
 def getListOfPossibleIndexesFromGamePosition(game_position):
+    """Returns a List of Integers
+    depending on the game_position, 3, 6, or 9 Integers are stored in a list and returned
+    The Integers represent Indexes used to get GamePositions from all_game_positions
+    """
     start_pieces = []
     end_pieces = []
     possible_moves = []
@@ -385,6 +393,18 @@ def copyPermutationToGamePosition(permutation3times3, offset_matrix_col, offset_
             game_matrix[columns + offset_col][rows + offset_row] = permutation3times3[columns][rows]
     return GamePosition(game_matrix, permutation_type, index)
 
+def pickle_loader(filename):
+    """ Deserialize a file of pickled objects. """
+    with open(filename, "rb") as f:
+        while True:
+            try:
+                yield pickle.load(f)
+            except EOFError:
+                break
+
+def save_object(obj, filename):
+    with open(filename, 'wb') as outp:  # Overwrites any existing file.
+        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
 
 def createAllPositions():
     """creates all 20*362.880 positions and appends them to all_game_positions
@@ -392,9 +412,6 @@ def createAllPositions():
 
     # timestamp for performance measurement
     start_time = time.time()
-    f = open("all_positions.txt", "a")
-
-
 
     all_game_positions = []
     offset_matrix_col = [[0 for row in range(3)] for col in range(3)]
@@ -450,8 +467,6 @@ def createAllPositions():
                                         game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full, index)
                                         game_position.possible_moves_indexes = getListOfPossibleIndexesFromGamePosition(game_position)
                                         all_game_positions.append(game_position)
-                                        print ('Index: ', game_position.index , 'matrix: ' , game_position.matrix, file = f)
-                                        print ('Possible Moves: ', getListOfPossibleIndexesFromGamePosition(game_position), file = f)
 
 
                                             
@@ -561,8 +576,6 @@ def createAllPositions():
                                         game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full, index)
                                         game_position.possible_moves_indexes = getListOfPossibleIndexesFromGamePosition(game_position)
                                         all_game_positions.append(game_position)
-                                        print ('Index: ', game_position.index , 'matrix: ' , game_position.matrix, file = f)
-                                        print ('Possible Moves: ', getListOfPossibleIndexesFromGamePosition(game_position), file = f)
   
     
     offset_matrix_col = [[0 for row in range(3)] for col in range(3)]
@@ -614,14 +627,45 @@ def createAllPositions():
                                         game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_one_columns_full, index)
                                         game_position.possible_moves_indexes = getListOfPossibleIndexesFromGamePosition(game_position)
                                         all_game_positions.append(game_position)
-                                        print ('Index: ', game_position.index , 'matrix: ' , game_position.matrix, file = f)
-                                        print ('Possible Moves: ', getListOfPossibleIndexesFromGamePosition(game_position), file = f)
     print("Process finished --- %s seconds ---" % (time.time() - start_time))
-    f.close()
+
+
+    return all_game_positions
+
+
+def getSingleNewPosition(col_end,row_end, start_position, end_position):
+    for col_base in range(3):
+        for row_base in range(3): 
+            if end_position.matrix[col_end][row_end] == (col_base * 3 + row_base + 1):
+                return start_position[col_end][row_end]
+
+def mapPositionToStartPosition(start_position, end_position):
+    numbers = []
+    new_matrix = [[0 for row in range(3)] for col in range(4)]
+
+    for col_end in range(3):
+        for row_end in range(3):
+            new_matrix[col_end][row_end] = getSingleNewPosition(col_end,row_end, start_position, end_position)
+            
+
+    return GamePosition(new_matrix, 0, 0)
+
+
+
+def getListOfIndexesForShortestPath(start_position, end_position, all_game_positions):
+    start_index = getListIndexFromGamePosition(start_position)
+    end_index = getListIndexFromGamePosition(end_position)
+
+
+
+
 def main():
     print('main')
-    #createAllPositions()
-    testDijkstra()
+    all_game_positions = createAllPositions()
+
+    print('starting Dijkstra')
+    callDijkstra(all_game_positions)
+    save_object(all_game_positions, 'all_game_positions.pkl')
 
 if __name__ == "__main__":
     main()
