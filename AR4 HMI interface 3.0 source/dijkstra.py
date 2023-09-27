@@ -4,11 +4,15 @@ import math
 import copy
 
 class GamePosition:
-    def __init__(self, matrix, permutation_type, distancevalue):
+    def __init__(self, matrix, permutation_type, index, weight = 1):
         self.matrix = matrix
-        self.distancevalue = distancevalue
+        self.distance_value = 10000
         self.permutation_type = permutation_type
         self.possible_moves_indexes = []
+        self.is_checked = 0
+        self.weight = weight
+        self.previous_index = 0
+        self.index = index
 
     def getAllPossibleMoves(self, all_game_positions):
         #returns an Array of up to 12 GamePositions
@@ -25,6 +29,38 @@ class GamePosition:
                     pass
 
 
+def insertIntoSortedListOfGamePositions(game_position, unvisited_nodes, lower_bound=0, higher_bound=None):
+    """Insert item game_position in list unvisited_nodes,
+      and keep it sorted assuming unvisited_nodes is sorted.
+    If game_position is already in unvisited_nodes, insert it to the right of the rightmost game_position.
+    Optional args lo (default 0) and hi (default len(a)) bound the
+    slice of a to be searched.
+    """
+
+    if lower_bound < 0:
+        raise ValueError('lower_bound must be non-negative')
+    if higher_bound is None:
+        higher_bound = len(game_position.distance_value)
+    while lower_bound < higher_bound:
+        mid = (lower_bound+higher_bound)//2
+        if game_position.distance_value < unvisited_nodes[mid].distance_value:
+            higher_bound = mid
+        else:
+            lower_bound = mid+1
+    unvisited_nodes.insert(lower_bound, game_position)
+    return lower_bound
+
+
+def checkAllPossibleNodesForShortestPath(game_position, all_game_positions):
+    for nodes in  game_position.possible_moves_indexes:
+        next_position_distance_value = all_game_positions[nodes].distance_value
+        if( (game_position.distance_value + 1) < next_position_distance_value):
+            #new shortest path was found
+            all_game_positions[nodes].distance_value = game_position.distance_value + 1
+            all_game_positions[nodes].previous_index = game_position.index
+
+
+
 def getListOfIndexesFromPossibleMoves(game_position, possible_moves):
     possible_indexes = []
     for move in possible_moves:
@@ -35,7 +71,6 @@ def getListOfIndexesFromPossibleMoves(game_position, possible_moves):
         index = getListIndexFromGamePosition(actual_game_position)
         possible_indexes.append(index)
     return possible_indexes
-
 
 def getListOfPossibleIndexesFromGamePosition(game_position):
     start_pieces = []
@@ -59,186 +94,6 @@ def getListOfPossibleIndexesFromGamePosition(game_position):
                 #not same column
                 possible_moves.append([[start_pos],[end_pos]])
     return getListOfIndexesFromPossibleMoves(game_position, possible_moves)
-
-
-
-def getPossibleMovesFromPermutationType(permutation_type):
-
-
-    move = [[0 for row in range(2)] for col in range(2)]
-    possible_moves = []
-    match permutation_type:
-        case 0:
-            move = [0,2][3,0]
-            possible_moves.append([0,2][3,0])
-
-            move = [1,2][3,0]
-            possible_moves.append(move)
-
-            move = [2,2][3,0]
-            possible_moves.append(move)
-
-        case  1:
-            move = [0,2][2,0]
-            possible_moves.append(move)
-
-            move = [1,2][2,0]
-            possible_moves.append(move)
-
-            move = [3,2][2,0]
-            possible_moves.append(move)
-
-        case  2:
-            move = [0,2][1,0]
-            possible_moves.append(move)
-
-            move = [2,2][1,0]
-            possible_moves.append(move)
-
-            move = [3,2][1,0]
-            possible_moves.append(move)
-
-        case  3:
-            move = [1,2][0,0]
-            possible_moves.append(move)
-
-            move = [2,2][0,0]
-            possible_moves.append(move)
-
-            move = [3,2][0,0]
-            possible_moves.append(move)
-
-        case  4:
-            move = [0,2][2,2]
-            possible_moves.append(move)
-
-            move = [0,2][3,1]
-            possible_moves.append(move)
-
-            move = [1,2][2,2]
-            possible_moves.append(move)
-
-            move = [1,2][3,1]
-            possible_moves.append(move)
-
-            move = [2,1][3,1]
-            possible_moves.append(move)
-
-            move = [3,0][2,2]
-            possible_moves.append(move)
-
-        case  5:
-            move = [0,2][1,2]
-            possible_moves.append(move)
-
-            move = [0,2][3,1]
-            possible_moves.append(move)
-
-            move = [2,2][1,2]
-            possible_moves.append(move)
-
-            move = [2,2][3,1]
-            possible_moves.append(move)
-
-            move = [1,1][3,1]
-            possible_moves.append(move)
-
-            move = [3,0][1,2]
-            possible_moves.append(move)
-
-        case  6:
-            move = [1,2][0,2]
-            possible_moves.append(move)
-
-            move = [1,2][3,1]
-            possible_moves.append(move)
-
-            move = [2,2][0,2]
-            possible_moves.append(move)
-
-            move = [2,2][3,1]
-            possible_moves.append(move)
-
-            move = [0,1][3,1]
-            possible_moves.append(move)
-
-            move = [3,0][0,2]
-            possible_moves.append(move)
-
-        case  7:
-            move = [1,2][3,2]
-            possible_moves.append(move)
-
-            move = [1,2][0,1]
-            possible_moves.append(move)
-
-            move = [2,2][3,2]
-            possible_moves.append(move)
-
-            move = [2,2][0,1]
-            possible_moves.append(move)
-
-            move = [0,0][3,2]
-            possible_moves.append(move)
-
-            move = [3,1][0,1]
-            possible_moves.append(move)
-
-        case  8:
-            move = [1,2][3,2]
-            possible_moves.append(move)
-
-            move = [1,2][0,1]
-            possible_moves.append(move)
-
-            move = [2,2][3,2]
-            possible_moves.append(move)
-
-            move = [2,2][0,1]
-            possible_moves.append(move)
-
-            move = [0,0][3,2]
-            possible_moves.append(move)
-
-            move = [3,1][0,1]
-            possible_moves.append(move)
-
-        case  9:
-            inverse_columns =  [[0, 3, 2], [0, 0, 2], [0, 0, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
-        case  10:
-            inverse_columns =  [[0, 3, 2], [0, -1, 2], [0, 0, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
-        case  11:
-            inverse_columns =  [[0, 3, 0], [0, -1, 2], [0, 0, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
-        case  12:
-            inverse_columns =  [[0, 3, 0], [0, -1, 1], [0, 0, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
-        case  13:
-            inverse_columns =  [[0, 0, 0], [0, 0, 0], [0, 1, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
-        case  14:
-            inverse_columns =  [[0, 0, 0], [0, 0, 2], [0, 1, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
-        case  15:
-            inverse_columns =  [[0, 0, 1], [0, 0, 2], [0, 1, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
-        case  16:
-            inverse_columns =  [[0, 0, 0], [0, 0, 2], [0, 0, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, -1], [0, 0, -2]]
-        case  17:
-            inverse_columns =  [[0, 0, 1], [0, 0, 2], [0, 0, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, -1], [0, 0, -2]]
-        case  18:
-            inverse_columns =  [[0, 0, 2], [0, 0, 2], [0, 0, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, -1], [0, 0, -2]]
-        case  19:
-            inverse_columns =  [[0, 0, 3], [0, 0, 2], [0, 0, 1]]
-            inverse_rows =  [[0, 0, 0], [0, 0, -1], [0, 0, -2]]
-        case _:
-            print('no match in getInverseMatrixFromPermutationType')
-
 
 def getPermutationTypeFromGamePositon(game_positon_matrix):
     """return an Integer Number between 0 an 20
@@ -456,7 +311,7 @@ def createPermutation(first_piece, second_piece, third_piece, fourth_piece, fift
     permutation3times3 = getNewPermutation(permutation3times3, 0, 9) #ninth piece always the same
     return permutation3times3
 
-def copyPermutationToGamePosition(permutation3times3, offset_matrix_col, offset_matrix_row, permutation_type):
+def copyPermutationToGamePosition(permutation3times3, offset_matrix_col, offset_matrix_row, permutation_type, index):
     """returns a 4x3 matrix
     copies a 3x3 permutation onto the 4 columns of a game_position
     """
@@ -466,7 +321,7 @@ def copyPermutationToGamePosition(permutation3times3, offset_matrix_col, offset_
             offset_col = offset_matrix_col[columns][rows]
             offset_row = offset_matrix_row[columns][rows]
             game_matrix[columns + offset_col][rows + offset_row] = permutation3times3[columns][rows]
-    return GamePosition(game_matrix, permutation_type, 0)
+    return GamePosition(game_matrix, permutation_type, index)
 
 
 def createAllPositions():
@@ -528,11 +383,12 @@ def createAllPositions():
                             for sixth_piece in range(4):
                                 for seventh_piece in range(3):
                                     for eigth_piece in range(2):
+                                        index = (len(all_game_positions))
                                         permutation = createPermutation(first_piece, second_piece, third_piece, fourth_piece, fifth_piece, sixth_piece, seventh_piece, eigth_piece)
-                                        game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full)
+                                        game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full, index)
                                         game_position.possible_moves_indexes = getListOfPossibleIndexesFromGamePosition(game_position)
                                         all_game_positions.append(game_position)
-                                        print ('Index: ', (len(all_game_positions) -1 ), 'matrix: ' , game_position.matrix, file = f)
+                                        print ('Index: ', game_position.index , 'matrix: ' , game_position.matrix, file = f)
                                         print ('Possible Moves: ', getListOfPossibleIndexesFromGamePosition(game_position), file = f)
 
 
@@ -638,9 +494,13 @@ def createAllPositions():
                             for sixth_piece in range(4):
                                 for seventh_piece in range(3):
                                     for eigth_piece in range(2):
+                                        index = (len(all_game_positions))
                                         permutation = createPermutation(first_piece, second_piece, third_piece, fourth_piece, fifth_piece, sixth_piece, seventh_piece, eigth_piece)
-                                        game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full)
+                                        game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full, index)
+                                        game_position.possible_moves_indexes = getListOfPossibleIndexesFromGamePosition(game_position)
                                         all_game_positions.append(game_position)
+                                        print ('Index: ', game_position.index , 'matrix: ' , game_position.matrix, file = f)
+                                        print ('Possible Moves: ', getListOfPossibleIndexesFromGamePosition(game_position), file = f)
   
     
     offset_matrix_col = [[0 for row in range(3)] for col in range(3)]
@@ -687,9 +547,13 @@ def createAllPositions():
                             for sixth_piece in range(4):
                                 for seventh_piece in range(3):
                                     for eigth_piece in range(2):
+                                        index = (len(all_game_positions))
                                         permutation = createPermutation(first_piece, second_piece, third_piece, fourth_piece, fifth_piece, sixth_piece, seventh_piece, eigth_piece)
-                                        game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_all_columns_full)
+                                        game_position = copyPermutationToGamePosition(permutation, offset_matrix_col, offset_matrix_row, number_one_columns_full, index)
+                                        game_position.possible_moves_indexes = getListOfPossibleIndexesFromGamePosition(game_position)
                                         all_game_positions.append(game_position)
+                                        print ('Index: ', game_position.index , 'matrix: ' , game_position.matrix, file = f)
+                                        print ('Possible Moves: ', getListOfPossibleIndexesFromGamePosition(game_position), file = f)
     print("Process finished --- %s seconds ---" % (time.time() - start_time))
     f.close()
 def main():
