@@ -22,6 +22,222 @@ class GamePosition:
                 for row_number in range(3):
                     pass
 
+
+def getListOfIndexesFromPossibleMoves(game_position, possible_moves):
+    possible_indexes = []
+    for move in possible_moves:
+        actual_game_position = game_position.copy()
+        #end piece is start piece
+        actual_game_position.matrix[move[1]] = actual_game_position.matrix[move[0]]
+        actual_game_position.matrix[move[0]] = 0
+        index = getListIndexFromGamePosition(actual_game_position)
+        possible_indexes.append(index)
+    return possible_indexes
+
+
+def getListOfPossibleIndexesFromGamePosition(game_position):
+    start_pieces = []
+    end_pieces = []
+    possible_moves = []
+    for col in range(4):
+        
+        for row_from_top in range(3):
+            if (game_position.matrix[col][0]) == 0:
+                end_pieces.append([col, 0])
+                break
+            if game_position.matrix[col][2-row_from_top] != 0:
+                start_pieces.append([col, 2 - row_from_top])
+                if row_from_top > 0:
+                    end_pieces.append([col, 2 - row_from_top + 1])
+                break
+    
+    for start_pos in start_pieces:
+        for end_pos in end_pieces:
+            if start_pos[0] != end_pos[0]:
+                #not same column
+                possible_moves.append([start_pos][end_pos])
+    return getListOfIndexesFromPossibleMoves(game_position, possible_moves)
+
+
+
+def getPossibleMovesFromPermutationType(permutation_type):
+
+
+    move = [[0 for row in range(2)] for col in range(2)]
+    possible_moves = []
+    match permutation_type:
+        case 0:
+            move = [0,2][3,0]
+            possible_moves.append([0,2][3,0])
+
+            move = [1,2][3,0]
+            possible_moves.append(move)
+
+            move = [2,2][3,0]
+            possible_moves.append(move)
+
+        case  1:
+            move = [0,2][2,0]
+            possible_moves.append(move)
+
+            move = [1,2][2,0]
+            possible_moves.append(move)
+
+            move = [3,2][2,0]
+            possible_moves.append(move)
+
+        case  2:
+            move = [0,2][1,0]
+            possible_moves.append(move)
+
+            move = [2,2][1,0]
+            possible_moves.append(move)
+
+            move = [3,2][1,0]
+            possible_moves.append(move)
+
+        case  3:
+            move = [1,2][0,0]
+            possible_moves.append(move)
+
+            move = [2,2][0,0]
+            possible_moves.append(move)
+
+            move = [3,2][0,0]
+            possible_moves.append(move)
+
+        case  4:
+            move = [0,2][2,2]
+            possible_moves.append(move)
+
+            move = [0,2][3,1]
+            possible_moves.append(move)
+
+            move = [1,2][2,2]
+            possible_moves.append(move)
+
+            move = [1,2][3,1]
+            possible_moves.append(move)
+
+            move = [2,1][3,1]
+            possible_moves.append(move)
+
+            move = [3,0][2,2]
+            possible_moves.append(move)
+
+        case  5:
+            move = [0,2][1,2]
+            possible_moves.append(move)
+
+            move = [0,2][3,1]
+            possible_moves.append(move)
+
+            move = [2,2][1,2]
+            possible_moves.append(move)
+
+            move = [2,2][3,1]
+            possible_moves.append(move)
+
+            move = [1,1][3,1]
+            possible_moves.append(move)
+
+            move = [3,0][1,2]
+            possible_moves.append(move)
+
+        case  6:
+            move = [1,2][0,2]
+            possible_moves.append(move)
+
+            move = [1,2][3,1]
+            possible_moves.append(move)
+
+            move = [2,2][0,2]
+            possible_moves.append(move)
+
+            move = [2,2][3,1]
+            possible_moves.append(move)
+
+            move = [0,1][3,1]
+            possible_moves.append(move)
+
+            move = [3,0][0,2]
+            possible_moves.append(move)
+
+        case  7:
+            move = [1,2][3,2]
+            possible_moves.append(move)
+
+            move = [1,2][0,1]
+            possible_moves.append(move)
+
+            move = [2,2][3,2]
+            possible_moves.append(move)
+
+            move = [2,2][0,1]
+            possible_moves.append(move)
+
+            move = [0,0][3,2]
+            possible_moves.append(move)
+
+            move = [3,1][0,1]
+            possible_moves.append(move)
+
+        case  8:
+            move = [1,2][3,2]
+            possible_moves.append(move)
+
+            move = [1,2][0,1]
+            possible_moves.append(move)
+
+            move = [2,2][3,2]
+            possible_moves.append(move)
+
+            move = [2,2][0,1]
+            possible_moves.append(move)
+
+            move = [0,0][3,2]
+            possible_moves.append(move)
+
+            move = [3,1][0,1]
+            possible_moves.append(move)
+
+        case  9:
+            inverse_columns =  [[0, 3, 2], [0, 0, 2], [0, 0, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
+        case  10:
+            inverse_columns =  [[0, 3, 2], [0, -1, 2], [0, 0, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
+        case  11:
+            inverse_columns =  [[0, 3, 0], [0, -1, 2], [0, 0, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
+        case  12:
+            inverse_columns =  [[0, 3, 0], [0, -1, 1], [0, 0, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
+        case  13:
+            inverse_columns =  [[0, 0, 0], [0, 0, 0], [0, 1, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
+        case  14:
+            inverse_columns =  [[0, 0, 0], [0, 0, 2], [0, 1, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
+        case  15:
+            inverse_columns =  [[0, 0, 1], [0, 0, 2], [0, 1, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, 0], [0, 0, -2]]
+        case  16:
+            inverse_columns =  [[0, 0, 0], [0, 0, 2], [0, 0, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, -1], [0, 0, -2]]
+        case  17:
+            inverse_columns =  [[0, 0, 1], [0, 0, 2], [0, 0, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, -1], [0, 0, -2]]
+        case  18:
+            inverse_columns =  [[0, 0, 2], [0, 0, 2], [0, 0, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, -1], [0, 0, -2]]
+        case  19:
+            inverse_columns =  [[0, 0, 3], [0, 0, 2], [0, 0, 1]]
+            inverse_rows =  [[0, 0, 0], [0, 0, -1], [0, 0, -2]]
+        case _:
+            print('no match in getInverseMatrixFromPermutationType')
+
+
 def getPermutationTypeFromGamePositon(game_positon_matrix):
     """return an Integer Number between 0 an 20
     different possible Game Patterns are analysed and definetely assigned to a permutation type
