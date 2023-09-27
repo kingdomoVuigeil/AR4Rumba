@@ -40,7 +40,7 @@ def insertIntoSortedListOfGamePositions(game_position, unvisited_nodes, lower_bo
     if lower_bound < 0:
         raise ValueError('lower_bound must be non-negative')
     if higher_bound is None:
-        higher_bound = len(game_position.distance_value)
+        higher_bound = len(unvisited_nodes)
     while lower_bound < higher_bound:
         mid = (lower_bound+higher_bound)//2
         if game_position.distance_value < unvisited_nodes[mid].distance_value:
@@ -51,13 +51,75 @@ def insertIntoSortedListOfGamePositions(game_position, unvisited_nodes, lower_bo
     return lower_bound
 
 
-def checkAllPossibleNodesForShortestPath(game_position, all_game_positions):
+def checkAllPossibleNodesForShortestPath(game_position, all_game_positions, unvisited_nodes):
     for nodes in  game_position.possible_moves_indexes:
         next_position_distance_value = all_game_positions[nodes].distance_value
         if( (game_position.distance_value + 1) < next_position_distance_value):
             #new shortest path was found
             all_game_positions[nodes].distance_value = game_position.distance_value + 1
             all_game_positions[nodes].previous_index = game_position.index
+            if(all_game_positions[nodes].is_checked == 0):
+                insertIntoSortedListOfGamePositions(all_game_positions[nodes], unvisited_nodes)
+    unvisited_nodes.remove(game_position)
+            
+
+def callDijkstra(all_game_positions):
+    unvisited_nodes = []
+    #starting node
+    all_game_positions[0].distance_value = 0
+    unvisited_nodes.append(all_game_positions[0])
+
+    while unvisited_nodes:
+        checkAllPossibleNodesForShortestPath(unvisited_nodes[0], all_game_positions, unvisited_nodes)
+    print('Dijkstra done')
+
+def testDijkstra():
+    all_game_positions = []
+    for number in range(9):
+        all_game_positions.append(GamePosition(0, 0, number))
+    all_game_positions[0].possible_moves_indexes.append(1)
+    all_game_positions[0].possible_moves_indexes.append(3)
+
+    all_game_positions[1].possible_moves_indexes.append(0)
+    all_game_positions[1].possible_moves_indexes.append(2)
+    all_game_positions[1].possible_moves_indexes.append(4)
+
+    all_game_positions[2].possible_moves_indexes.append(1)
+    all_game_positions[2].possible_moves_indexes.append(5)
+
+    all_game_positions[3].possible_moves_indexes.append(0)
+    all_game_positions[3].possible_moves_indexes.append(4)
+    all_game_positions[3].possible_moves_indexes.append(6)
+
+    all_game_positions[4].possible_moves_indexes.append(1)
+    all_game_positions[4].possible_moves_indexes.append(3)
+    all_game_positions[4].possible_moves_indexes.append(5)
+    all_game_positions[4].possible_moves_indexes.append(7)
+
+    all_game_positions[5].possible_moves_indexes.append(2)
+    all_game_positions[5].possible_moves_indexes.append(4)
+    all_game_positions[5].possible_moves_indexes.append(8)
+
+    all_game_positions[6].possible_moves_indexes.append(3)
+    all_game_positions[6].possible_moves_indexes.append(7)
+    all_game_positions[6].possible_moves_indexes.append(8)
+
+    all_game_positions[7].possible_moves_indexes.append(4)
+    all_game_positions[7].possible_moves_indexes.append(6)
+    all_game_positions[7].possible_moves_indexes.append(8)
+
+    all_game_positions[8].possible_moves_indexes.append(5)
+    all_game_positions[8].possible_moves_indexes.append(7)
+
+    callDijkstra(all_game_positions)
+
+
+
+
+
+
+
+
 
 
 
@@ -96,7 +158,7 @@ def getListOfPossibleIndexesFromGamePosition(game_position):
     return getListOfIndexesFromPossibleMoves(game_position, possible_moves)
 
 def getPermutationTypeFromGamePositon(game_positon_matrix):
-    """return an Integer Number between 0 an 20
+    """return an Integer Number between 0 and 20
     different possible Game Patterns are analysed and definetely assigned to a permutation type
     e.g.: if in the third column the most bottom plac is empty,
       than it is clear that the first three columns are full -> type 0
@@ -558,7 +620,8 @@ def createAllPositions():
     f.close()
 def main():
     print('main')
-    createAllPositions()
+    #createAllPositions()
+    testDijkstra()
 
 if __name__ == "__main__":
     main()
