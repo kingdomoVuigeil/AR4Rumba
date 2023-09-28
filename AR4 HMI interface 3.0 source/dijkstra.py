@@ -632,40 +632,48 @@ def createAllPositions():
 
     return all_game_positions
 
+def getIndexOfNumberInArray(number, matrix):
+    for col in range(3):
+        for row in range(3):
+            if number == matrix[col][row]:
+                return col, row
 
-def getSingleNewPosition(col_end,row_end, start_position, end_position):
-    for col_base in range(3):
-        for row_base in range(3): 
-            if end_position.matrix[col_end][row_end] == (col_base * 3 + row_base + 1):
-                return start_position[col_end][row_end]
 
 def mapPositionToStartPosition(start_position, end_position):
-    numbers = []
+
     new_matrix = [[0 for row in range(3)] for col in range(4)]
-
-    for col_end in range(3):
-        for row_end in range(3):
-            new_matrix[col_end][row_end] = getSingleNewPosition(col_end,row_end, start_position, end_position)
-            
-
-    return GamePosition(new_matrix, 0, 0)
-
-
+    for number in range (9):
+        for col in range(3):
+            for row in range(3):
+                actual_number = (start_position.matrix[col][row])
+                new_matrix_column, new_matrix_row = getIndexOfNumberInArray(actual_number, end_position.matrix)
+                new_matrix[new_matrix_column][new_matrix_row] = col*3 + row +1
+                
+    return getListIndexFromGamePosition(GamePosition(new_matrix, 0, 0))
 
 def getListOfIndexesForShortestPath(start_position, end_position, all_game_positions):
-    start_index = getListIndexFromGamePosition(start_position)
-    end_index = getListIndexFromGamePosition(end_position)
+    start_index = 0
+    end_index = mapPositionToStartPosition(start_position, end_position)
+    print('end')
 
+def testCallShortestPath():
+    game_pos_start_matrix = [[2, 5, 8], [1, 3, 6], [9, 7, 4], [0, 0, 0]]
+    game_pos_end_matrix = [[3, 8, 9], [1, 7, 2], [6, 4, 5], [0, 0, 0]]
 
+    game_pos_start = GamePosition(game_pos_start_matrix, 0, 0)
+    game_pos_end = GamePosition(game_pos_end_matrix, 0, 0)
 
+    getListOfIndexesForShortestPath(game_pos_start, game_pos_end, 0)
 
 def main():
     print('main')
-    all_game_positions = createAllPositions()
+    testCallShortestPath()
 
-    print('starting Dijkstra')
-    callDijkstra(all_game_positions)
-    save_object(all_game_positions, 'all_game_positions.pkl')
+    #all_game_positions = createAllPositions()
+    
+    #print('starting Dijkstra')
+    #callDijkstra(all_game_positions)
+    #save_object(all_game_positions, 'all_game_positions.pkl')
 
 if __name__ == "__main__":
     main()
